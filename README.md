@@ -1,7 +1,7 @@
 
 Project developers
 ========================================================
-Luke Murtagh
+Luke Murtagh , 
 Diane Jugul Dalyop
 =========================================================
 The aim
