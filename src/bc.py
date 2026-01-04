@@ -22,7 +22,7 @@ from imgaug import augmenters as iaa
 
 num_bins = 25
 samples_per_bin = 400
-datadir = "C:\\Users\\johnl\\dev\\Smart Technologies\\ST25\\bc_car\\DataForCar\\" 
+datadir = "DataForCar" 
 
 def main():
     data = load_data()
