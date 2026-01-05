@@ -2,6 +2,10 @@
 
 import cv2
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import os
+
 
 # Crop, resize, normalize image
 def preprocess_image(img):
@@ -21,3 +25,23 @@ def preprocess_image(img):
     img = img / 255.0 - 0.5
 
     return img
+
+
+
+TRACK1_MAIN = "data/track1_main/Udacity_sim_Track1_rec/driving_log.csv"
+TRACK1_RECOVERY = "data/track1_recovery/Udacity_sim_Track1_recovery/driving_log.csv"
+
+
+def load_data():
+    df1 = pd.read_csv(TRACK1_MAIN)
+    df2 = pd.read_csv(TRACK1_RECOVERY)
+
+    df = pd.concat([df1, df2], ignore_index=True)
+
+    print("Total number of samples:", len(df))
+    print("Columns:", df.columns)
+
+    return df
+
+if __name__ == "__main__":
+    df = load_data()
