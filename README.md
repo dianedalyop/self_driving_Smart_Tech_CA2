@@ -25,3 +25,5 @@ self-driving/
 ├── models  # the trained model
 ├── README.md
 └── requirements.txt
+
+Recording data done
