@@ -1,5 +1,3 @@
-
-
 import cv2
 import numpy as np
 import pandas as pd
@@ -27,21 +25,33 @@ def preprocess_image(img):
     return img
 
 
-
 TRACK1_MAIN = "data/track1_main/Udacity_sim_Track1_rec/driving_log.csv"
 TRACK1_RECOVERY = "data/track1_recovery/Udacity_sim_Track1_recovery/driving_log.csv"
 
+columns_name= [
+    "center",
+    "left",
+    "right",
+    "steering",
+    "throttle",
+    "brake",
+    "speed"
+]
 
 def load_data():
-    df1 = pd.read_csv(TRACK1_MAIN)
-    df2 = pd.read_csv(TRACK1_RECOVERY)
-
+    df1 = pd.read_csv(TRACK1_MAIN, header=None, names=columns_name)
+    df2 = pd.read_csv(TRACK1_RECOVERY, header=None, names=columns_name)
+   
     df = pd.concat([df1, df2], ignore_index=True)
 
     print("Total number of samples:", len(df))
     print("Columns:", df.columns)
 
+    print("Table rows:")
+    print(df.head())
+
     return df
+
 
 if __name__ == "__main__":
     df = load_data()
