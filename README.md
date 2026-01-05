@@ -26,4 +26,7 @@ self-driving/
 ├── README.md
 └── requirements.txt
 
-Recording data done
+1.Recording data done
+2.Pre-process complete
+3.Exploration : Steering angle stage 1 : noticed a bias toward zero steering 
+
