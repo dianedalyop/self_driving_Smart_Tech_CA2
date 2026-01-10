@@ -26,7 +26,7 @@ def preprocess_image(img):
 
 
 TRACK1_MAIN = "data/track1_main/Udacity_sim_Track1_rec/driving_log.csv"
-TRACK1_RECOVERY = "data/track1_recovery/Udacity_sim_Track1_recovery/driving_log.csv"
+TRACK1_RECOVERY = "data/track1_recovery/Udacity_sim_track1_recovery/driving_log.csv"
 
 columns_name= [
     "center",
@@ -51,6 +51,14 @@ def load_data():
     print(df.head())
 
     return df
+
+
+def load_main_data():
+    return pd.read_csv(TRACK1_MAIN, names=columns_name)
+
+def load_recovery_data():
+    return pd.read_csv(TRACK1_RECOVERY, names=columns_name)
+
 
 
 if __name__ == "__main__":
