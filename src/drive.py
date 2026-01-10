@@ -1,120 +1,82 @@
 import base64
 import io
 import os
-
 import numpy as np
 import socketio
 from flask import Flask
 from PIL import Image
 from tensorflow.keras.models import load_model
 from wsgiref import simple_server
+import eventlet
+from io import BytesIO
+import cv2
 
 from data_preprocess import preprocess_image
 
+# Initialize the Socket.IO server and Flask app
+sio = socketio.Server(async_mode='eventlet', cors_allowed_origins='*')
+app = Flask(__name__)
 
-sio = socketio.Server(
-    async_mode="threading",
-    cors_allowed_origins="*"
-)
+speed_limit = 10
 
-flask_app = Flask(__name__)
+# Load the model in the global scope so the telemetry function can always access it
+# Ensure 'nvidia_elu_augmented.keras' is in your project root folder
+model = load_model("nvidia_elu_augmented.keras")
 
+def img_preprocess(img):
+    """
+    Pre-processes the image to match the format used during training in bc.py.
+    """
+    img = img[60:135, :, :] # Crop the image
+    img = cv2.cvtColor(img, cv2.COLOR_RGB2YUV) # Convert to YUV
+    img = cv2.GaussianBlur(img, (3, 3), 0)
+    img = cv2.resize(img, (200, 66))
+    img = img / 255.0
+    return img
 
+@sio.on('telemetry')
+def telemetry(sid, data):
+    if data:
+        # Decode the image from the simulator
+        image = Image.open(BytesIO(base64.b64decode(data['image'])))
+        image = np.asarray(image)
+        image = img_preprocess(image)
+        image = np.expand_dims(image, axis=0)
 
-app = socketio.WSGIApp(sio, flask_app)
+        # Get current speed and predict steering angle
+        speed = float(data['speed'])
+        steering_angle = float(model.predict(image)[0][0])
 
+        # Control logic for throttle
+        if speed < 1.0:
+            throttle = 0.8
+        else:
+            throttle = max(0.2, 1.0 - speed / speed_limit)
 
+        print(f"Steering: {steering_angle:.4f} Throttle: {throttle:.4f} Speed: {speed:.4f}")
+        send_control(steering_angle, throttle)
+    else:
+        sio.emit('manual', data={}, skip_sid=sid)
 
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "model.h5")
-print("Loading model from:", MODEL_PATH)
-model = load_model(MODEL_PATH, safe_mode=False, compile=False)
-print("Model loaded.")
-
-
-MAX_SPEED = 20.0
-MIN_SPEED = 5.0
-current_speed = 0.0
-
-
-
-
-@sio.event
+@sio.on('connect')
 def connect(sid, environ):
-    print("Client connected:", sid)
-    # Send neutral control on connect
+    print("Connected to Simulator!")
     send_control(0.0, 0.0)
 
-
-@sio.on("telemetry")
-def telemetry(sid, data):
-    global current_speed
-
-    if not data:
-        print("No telemetry data received.")
-        return
-
-    
-    try:
-        current_speed = float(data["speed"])
-        steering_angle = float(data["steering_angle"])
-    except Exception as e:
-        print("Error reading speed/angle:", e, "raw data:", data)
-        return
-
-    print(f"Telemetry: speed={current_speed:.2f}, sim_angle={steering_angle:.4f}")
-
-
-    img_str = data.get("image")
-    if not img_str:
-        print("No image data found in telemetry.")
-        return
-
-    try:
-        image = Image.open(io.BytesIO(base64.b64decode(img_str)))
-        image = np.asarray(image)
-    except Exception as e:
-        print("Error decoding image:", e)
-        return
-
-    processed = preprocess_image(image)
-    processed = np.expand_dims(processed, axis=0)
-
-   
-    steering_pred = float(model.predict(processed)[0][0])
-
-    if current_speed < MIN_SPEED:
-        throttle = 0.5
-    elif current_speed > MAX_SPEED:
-        throttle = 0.1
-    else:
-        throttle = 0.2
-
-    print(f"Sending control: steering={steering_pred:.4f}, throttle={throttle:.3f}")
-    send_control(steering_pred, throttle)
-
-
-def send_control(steering, throttle):
-    # Emit to simulator
+def send_control(steering_angle, throttle):
+    """
+    Sends steering and throttle commands back to the simulator.
+    """
     sio.emit(
-        "steer",
+        'steer',
         data={
-            "steering_angle": str(steering),
-            "throttle": str(throttle),
-        },
+            'steering_angle': str(steering_angle),
+            'throttle': str(throttle)
+        }
     )
 
-
-
 if __name__ == "__main__":
-    from wsgiref import simple_server
-    import socketio
-
-    
-    app_wrapper = socketio.WSGIApp(sio, app)
-
-    print("Starting drive server on port 4567")
-    server = simple_server.make_server("", 4567, app_wrapper)
-    server.serve_forever()
-    model = load_model("nvidia_elu_augmented.keras")
+    # Wrap the Flask app with Socket.IO middleware
     app = socketio.Middleware(sio, app)
+    # Start the eventlet WSGI server on port 4567
     eventlet.wsgi.server(eventlet.listen(('', 4567)), app)
