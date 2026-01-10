@@ -8,7 +8,7 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
-#training data (too big for git)
-DataForCar/IMG/
+# #training data (too big for git)
+# DataForCar/IMG/
 
 
