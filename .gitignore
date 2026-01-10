@@ -1,14 +1,4 @@
-venv/
-
-#python cache
+﻿venv/
 __pycache__/
 *.pyc
-
-#OS files
-.DS_Store
-Thumbs.db
-
-#training data (too big for git)
-DataForCar/IMG/
-
-
+src/__pycache__/
