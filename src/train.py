@@ -16,7 +16,9 @@ TRACK1_MAIN = "data/track1_main/Udacity_sim_Track1_rec/driving_log.csv"
 TRACK1_RECOVERY = "data/track1_recovery/Udacity_sim_track1_recovery/driving_log.csv"
 
 BATCH_SIZE = 32
-EPOCHS = 1   
+EPOCHS = 3 
+#increased epochs. more time to learn steering behaviour
+
 
 
 def load_samples():
