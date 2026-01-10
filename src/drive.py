@@ -115,3 +115,6 @@ if __name__ == "__main__":
     print("Starting drive server on port 4567")
     server = simple_server.make_server("", 4567, app_wrapper)
     server.serve_forever()
+    model = load_model("nvidia_elu_augmented.keras")
+    app = socketio.Middleware(sio, app)
+    eventlet.wsgi.server(eventlet.listen(('', 4567)), app)
