@@ -1,8 +1,7 @@
-venv/
-
-#python cache
+﻿venv/
 __pycache__/
 *.pyc
+src/__pycache__/
 
 #OS files
 .DS_Store
@@ -11,4 +10,8 @@ Thumbs.db
 # #training data (too big for git)
 # DataForCar/IMG/
 
+# data/
+# *.csv
+# *.jpg
+# *.png
 
