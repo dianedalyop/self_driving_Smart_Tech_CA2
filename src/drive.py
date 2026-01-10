@@ -13,6 +13,9 @@ from tensorflow.keras.models import load_model
 
 from data_preprocess import preprocess_image
 
+# Initialize the Socket.IO server and Flask app
+sio = socketio.Server(async_mode='eventlet', cors_allowed_origins='*')
+app = Flask(__name__)
 
 
 sio = socketio.Server(
@@ -66,8 +69,18 @@ def catch_all(event, sid, data):
     if event != "telemetry":
         print("Event received:", event)
 
+def img_preprocess(img):
+    """
+    Pre-processes the image to match the format used during training in bc.py.
+    """
+    img = img[60:135, :, :] # Crop the image
+    img = cv2.cvtColor(img, cv2.COLOR_RGB2YUV) # Convert to YUV
+    img = cv2.GaussianBlur(img, (3, 3), 0)
+    img = cv2.resize(img, (200, 66))
+    img = img / 255.0
+    return img
 
-@sio.on("telemetry")
+@sio.on('telemetry')
 def telemetry(sid, data):
     global current_speed
 
@@ -94,9 +107,8 @@ def telemetry(sid, data):
     try:
         image = Image.open(io.BytesIO(base64.b64decode(img_str)))
         image = np.asarray(image)
-    except Exception as e:
-        print("Error decoding image:", e)
-        return
+        image = img_preprocess(image)
+        image = np.expand_dims(image, axis=0)
 
     
     try:

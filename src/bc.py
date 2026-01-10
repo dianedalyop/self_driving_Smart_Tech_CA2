@@ -1,3 +1,4 @@
+import ntpath
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
@@ -199,7 +200,7 @@ def plot_validation_training_distribution(y_train, y_valid):
 
  
 def split_data(data):
-    image_paths, steerings = load_steering_img(datadir + 'IMG', data)
+    image_paths, steerings = load_steering_img(os.path.join(datadir, 'IMG'), data)
     X_train, X_valid, y_train, y_valid = train_test_split(image_paths, steerings, test_size=0.2, random_state=77)
     print(f"Training samples {len(X_train)}, Validation samples {len(X_valid)}")
     return X_train, X_valid, y_train, y_valid, image_paths
@@ -249,14 +250,28 @@ def bin_and_plot_data(data):
     plt.show()
     return bins, centre
     
+# def load_data():
+#     columns = ['center', 'left', 'right', 'steering', 'throttle', 'reverse', 'speed']
+#     data = pd.read_csv(os.path.join(datadir, 'driving_log.csv'), names = columns)
+#     pd.set_option('display.width', None)
+#     data['center'] = data['center'].apply(path_leaf)
+#     data['left'] = data['left'].apply(path_leaf)
+#     data['right'] = data['right'].apply(path_leaf)
+#     return data
+
 def load_data():
     columns = ['center', 'left', 'right', 'steering', 'throttle', 'reverse', 'speed']
-    data = pd.read_csv(os.path.join(datadir, 'driving_log.csv'), names = columns)
-    pd.set_option('display.width', None)
-    data['center'] = data['center'].apply(path_leaf)
-    data['left'] = data['left'].apply(path_leaf)
-    data['right'] = data['right'].apply(path_leaf)
+    data = pd.read_csv(os.path.join(datadir, 'driving_log.csv'), names=columns)
+
+    # Strip absolute paths added on dianes machine
+    data['center'] = data['center'].apply(ntpath.basename)
+    data['left']   = data['left'].apply(ntpath.basename)
+    data['right']  = data['right'].apply(ntpath.basename)
+    print("CSV paths fixed. Sample:")
+    print(data[['center']].head())
     return data
+
+
     
 def path_leaf(path):
     head, tail = ntpath.split(path)
