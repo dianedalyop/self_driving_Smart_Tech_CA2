@@ -25,3 +25,8 @@ self-driving/
 ├── models  # the trained model
 ├── README.md
 └── requirements.txt
+
+1.Recording data done
+2.Pre-process complete
+3.Exploration : Steering angle stage 1 : noticed a bias toward zero steering 
+
