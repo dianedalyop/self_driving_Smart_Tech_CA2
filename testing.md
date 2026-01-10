@@ -7,3 +7,7 @@ The trained model was tested using the Udacity self-driving car simulator in aut
 # Model Testing
 Due to the lack of telemetry from the simulator, model-level testing was performed independently to check that the model was working correctly. The model was loaded successfully, and input data with the same dimensions as pre-processed camera images (66x200x3) was passed in.
 The model produced continuous, non-zero steering angle outputs (e.g. 0.0776), showing that the model had learned steering behaviour.
+
+
+### Unit Testing
+Basic unit tests were added using pytest to check key components of the system.
