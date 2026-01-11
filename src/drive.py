@@ -77,7 +77,7 @@ def telemetry(sid, data):
 
     print("Telemetry received")
 
-    # Read speed , steering from simulator
+    # Reading speed steering from simulator
     try:
         current_speed = float(data.get("speed", 0.0))
         sim_angle = float(data.get("steering_angle", 0.0))
@@ -85,7 +85,7 @@ def telemetry(sid, data):
         print("Error reading telemetry:", e, "raw:", data)
         return
 
-    # Read camera image
+    # Reading camera image
     img_str = data.get("image")
     if not img_str:
         print("No image data found in telemetry.")
@@ -103,18 +103,21 @@ def telemetry(sid, data):
         processed = preprocess_image(image)
         processed = np.expand_dims(processed, axis=0)
         steering_pred = float(model.predict(processed, verbose=0).squeeze())
+
+         
+        steering_pred *= 1.15
+
     except Exception as e:
         print("Preprocess/predict error:", e)
-       
         send_control(0.0, 0.25)
         return
 
-    # Safety clamp steering
+   
     if np.isnan(steering_pred) or np.isinf(steering_pred):
         steering_pred = 0.0
     steering_pred = float(np.clip(steering_pred, -1.0, 1.0))
 
-    # Throttle control (more assertive at low speed)
+    # Throttle control 
     if current_speed < 2.0:
         throttle = 0.6
     elif current_speed < MIN_SPEED:
