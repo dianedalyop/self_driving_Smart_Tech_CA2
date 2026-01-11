@@ -74,6 +74,11 @@ if __name__ == "__main__":
     print("Steering mean:", df["steering"].mean())
     print("Steering median:", df["steering"].median())
 
+    df["steering"] = df["steering"] - df["steering"].mean()
+
+    print("NEW mean:", df["steering"].mean())
+    print("NEW median:", df["steering"].median())
+
     print("Final samples:", len(df))
     print("Near-zero %:", (df["steering"].abs() < 0.03).mean() * 100)
 

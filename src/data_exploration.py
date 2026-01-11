@@ -56,7 +56,7 @@ def downsample_near_zero(df, zero_thresh=0.03, keep_prob=0.10, seed=42):
     mask_zero = np.abs(angles) < zero_thresh
     keep_mask = np.ones(len(df), dtype=bool)
 
-    # randomly keep only some of the near-zero rows
+    
     keep_mask[np.where(mask_zero)[0]] = rng.random(np.sum(mask_zero)) < keep_prob
     return df.loc[keep_mask].reset_index(drop=True)
 
@@ -88,10 +88,10 @@ if __name__ == "__main__":
     main_df = load_main_data()
     recovery_df = load_recovery_data()
 
-    # Combine
+   
     combined_df = main_df.copy()._append(recovery_df, ignore_index=True)
 
-    # ---- BEFORE ----
+   
     dataset_size_summary(main_df, "Track 1 Main")
     dataset_size_summary(recovery_df, "Track 1 Recovery")
     dataset_size_summary(combined_df, "Combined (Main + Recovery)")
@@ -101,10 +101,9 @@ if __name__ == "__main__":
     steering_distribution_plot(combined_df, "Combined Steering Distribution (BEFORE)", bins=50)
     compare_main_vs_recovery(main_df, recovery_df, bins=50)
 
-    # ---- STEP 1: Near-zero downsample ----
-    # Tuning knobs:
+   
     ZERO_THRESH = 0.03
-    KEEP_PROB = 0.10  # try 0.08–0.15 if needed
+    KEEP_PROB = 0.10  
 
     combined_nz = downsample_near_zero(combined_df, zero_thresh=ZERO_THRESH, keep_prob=KEEP_PROB)
 
@@ -112,9 +111,9 @@ if __name__ == "__main__":
     print(f"Near-zero % AFTER near-zero downsample: {near_zero_percentage(combined_nz, ZERO_THRESH):.2f}%")
     steering_distribution_plot(combined_nz, "After Near-Zero Downsample", bins=50)
 
-    # ---- STEP 2: Bin balancing ----
+    
     N_BINS = 25
-    MAX_PER_BIN = 350  # adjust depending on dataset size
+    MAX_PER_BIN = 350 
 
     combined_bal = balance_by_bins(combined_nz, n_bins=N_BINS, max_per_bin=MAX_PER_BIN)
 
